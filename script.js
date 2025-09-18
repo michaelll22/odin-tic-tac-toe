@@ -1,42 +1,30 @@
-const turn = document.querySelector(".turn-indicator");
+//------------------
+// Game Board
+//------------------
 
-// Main Board
 const GameBoard = (() => {
-  let gameBoard = Array(9).fill("");
-
-  const render = () => {
-    let boardHTML = "";
-
-    gameBoard.forEach((square, index) => {
-      boardHTML += `<button class="square" id="square-${index}" data-index = "${index}">${square}</button>`;
-      document.querySelector("#gameboard").innerHTML = boardHTML;
-    });
-  };
-
-  const placeMark = (cell, mark, players) => {
-    cell.innerHTML = mark;
-    cell.classList.add(mark);
+  const cells = Array(9).fill("");
+  const getCells = () => cells;
+  const setCell = (index, player) => {
+    if (cells[index] === "") {
+      cells[index] = player.mark;
+    }
   };
 
   return {
-    render,
-    placeMark,
+    getCells,
+    setCell,
   };
 })();
 
-const createPlayer = (name, mark) => {
-  return {
-    name,
-    mark,
-  };
-};
+//------------------
+// Game Controller
+//------------------
 
-// Main Game Logic
-const Game = (() => {
-  let players = [];
-  let gameOver;
-
-  let currentPlayerIndex = 0;
+const GameController = (() => {
+  let gameRunning = false;
+  let winner = false;
+  let draw = false;
 
   // Win Conditions
   const winConditions = [
@@ -55,84 +43,174 @@ const Game = (() => {
     [2, 4, 6],
   ];
 
-  let options = Array(9).fill("");
+  const startBtn = document.querySelector("#start-button");
+  const restartBtn = document.querySelector("#restart-button");
 
-  // Initialize Game
-  const start = () => {
-    options = Array(9).fill("");
-    players = [
-      createPlayer(document.querySelector("#player1").value, "X"),
-      createPlayer(document.querySelector("#player2").value, "O"),
-    ];
+  const playerOne = document.getElementById("player1");
+  const playerTwo = document.getElementById("player2");
 
-    currentMark = players[currentPlayerIndex].mark;
+  players = [
+    {
+      name: "",
+      mark: "X",
+    },
 
-    turn.textContent = `${players[currentPlayerIndex].mark}: ${players[currentPlayerIndex].name}'s Turn`;
+    {
+      name: "",
+      mark: "O",
+    },
+  ];
 
-    gameOver = false;
+  let currentPlayer = players[0];
 
-    GameBoard.render();
+  startBtn.addEventListener("click", () => {
+    // if (playerOne.value && playerTwo.value) {
+    startBtn.style.display = "none";
+    ScreenController.hideUI();
 
-    const squares = document.querySelectorAll(".square");
+    createPlayers();
+    console.log(players);
 
-    squares.forEach((square) => {
-      square.addEventListener("click", Game.handleClick);
-    });
+    gameRunning = true;
+    winner = false;
+    currentPlayer = players[0];
+    GameBoard.getCells().fill("");
+    ScreenController.render(currentPlayer);
+    // }
+  });
+
+  restartBtn.addEventListener("click", () => {
+    resetGame();
+    GameBoard.getCells().fill("");
+    ScreenController.render(currentPlayer);
+  });
+
+  const createPlayers = () => {
+    players[0].name = playerOne.value;
+    players[1].name = playerTwo.value;
   };
 
-  // Handle Click
-  const handleClick = (event) => {
-    const square = event.target;
-    const cell = options[square.dataset.index];
+  const handleClick = (index) => {
+    if (!gameRunning) return;
 
-    if (cell !== "") {
-      return;
-    }
-    options[square.dataset.index] = currentMark;
-    GameBoard.placeMark(square, currentMark, players);
-    Game.checkWinner();
-    // Game.checkDraw();
-    Game.switchPlayer();
+    GameBoard.setCell(index, currentPlayer);
+    console.log(GameBoard.getCells());
+
+    checkWinner();
+    checkDraw();
+
+    if (draw) {
+      gameRunning = false;
+    } else if (!winner) {
+      switchPlayer();
+    } else gameRunning = false;
+
+    ScreenController.render(currentPlayer);
   };
 
   const checkWinner = () => {
     for (let i = 0; i < winConditions.length; i++) {
-      const condition = winConditions[i];
-      const cellA = options[condition[0]];
-      const cellB = options[condition[1]];
-      const cellC = options[condition[2]];
+      const conditions = winConditions[i];
+      const cellA = GameBoard.getCells()[conditions[0]];
+      const cellB = GameBoard.getCells()[conditions[1]];
+      const cellC = GameBoard.getCells()[conditions[2]];
 
-      if (cellA == "" || cellB == "" || cellC == "") {
-        continue;
-      }
-
-      if (cellA == cellB && cellB == cellC && cellC == cellA) {
-        gameOver = true;
-        turn.textContent = `${players[currentPlayerIndex].name} won`
+      if (cellA !== "" && cellB == cellC && cellC == cellA) {
+        winner = true;
       }
     }
   };
 
-  const switchPlayer = () => {
-    currentPlayerIndex = currentPlayerIndex == 0 ? 1 : 0;
-    currentMark = players[currentPlayerIndex].mark;
-    turn.textContent = `${players[currentPlayerIndex].mark}: ${players[currentPlayerIndex].name}'s Turn`;
+  const checkDraw = () => {
+    const cells = GameBoard.getCells();
+    console.log(cells);
+
+    if (!cells.includes("")) {
+      draw = true;
+    }
   };
 
-  const showOptions = () => console.log(options);
+  const resetGame = () => {
+    gameRunning = false;
+    winner = false;
+    currentPlayer = players[0];
+    ScreenController.removeBoard();
+  };
+
+  const switchPlayer = () => {
+    currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
+  };
+
+  const getCurrentPlayer = () => currentPlayer;
+
+  const getWinner = () => winner;
+
+  const getDraw = () => draw;
 
   return {
-    start,
     handleClick,
-    switchPlayer,
-    checkWinner,
-
-    showOptions,
+    getCurrentPlayer,
+    getWinner,
+    getDraw,
+    resetGame,
   };
 })();
 
-// Start
-const startButton = document.querySelector("#start-button");
-startButton.addEventListener("click", () => {
-  Game.start();
-});
+//------------------
+// Screen Controller
+//------------------
+
+const ScreenController = (() => {
+  const board = document.querySelector("#gameboard");
+  const info = document.querySelector(".game-info");
+
+  const render = (player) => {
+    board.innerHTML = "";
+    GameBoard.getCells().forEach((cell, index) => {
+      const button = document.createElement("button");
+      button.classList.add("cells");
+      button.dataset.cellIndex = `${index}`;
+      button.textContent = cell;
+      button.addEventListener("click", () => {
+        GameController.handleClick(index);
+      });
+
+      board.appendChild(button);
+      getButton(button);
+    });
+
+    console.log(GameController.getWinner());
+
+    if (GameController.getDraw()) {
+      info.textContent = `DRAW!`;
+    } else if (!GameController.getWinner() == false) {
+      info.textContent = `${player.mark}: ${player.name} wins`;
+    } else {
+      info.textContent = `${player.mark}: ${player.name}'s Turn`;
+    }
+  };
+
+  const getInfo = () => info;
+
+  const getGameInfo = (text) => (info.textContent = `${text}`);
+
+  const getButton = (button) => {
+    return button;
+  };
+
+  const removeBoard = () => {};
+
+  const hideUI = () => {
+    const inputs = document.querySelectorAll("input");
+
+    inputs.forEach((input) => (input.style.display = "none"));
+  };
+
+  return {
+    render,
+    getInfo,
+    removeBoard,
+    hideUI,
+    getGameInfo,
+  };
+})();

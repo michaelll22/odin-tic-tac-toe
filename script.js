@@ -43,6 +43,9 @@ const GameController = (() => {
     [2, 4, 6],
   ];
 
+  // ------------------
+  // BUTTONS AND INPUTS
+  // ------------------
   const startBtn = document.querySelector("#start-button");
   const restartBtn = document.querySelector("#restart-button");
 
@@ -62,6 +65,10 @@ const GameController = (() => {
   ];
 
   let currentPlayer = players[0];
+
+  // --------------------
+  // START AND RESET BTN
+  // --------------------
 
   startBtn.addEventListener("click", () => {
     // if (playerOne.value && playerTwo.value) {
@@ -108,6 +115,7 @@ const GameController = (() => {
     ScreenController.render(currentPlayer);
   };
 
+  // CHECK WINNER
   const checkWinner = () => {
     for (let i = 0; i < winConditions.length; i++) {
       const conditions = winConditions[i];
@@ -121,6 +129,7 @@ const GameController = (() => {
     }
   };
 
+  // CHECK DRAW
   const checkDraw = () => {
     const cells = GameBoard.getCells();
     console.log(cells);
@@ -130,6 +139,9 @@ const GameController = (() => {
     }
   };
 
+  //-------------------------
+  //RESET (****INCOMPLETE****)
+  //-------------------------
   const resetGame = () => {
     gameRunning = false;
     winner = false;

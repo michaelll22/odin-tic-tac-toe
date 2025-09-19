@@ -15,7 +15,7 @@ header {
   gap: 10px;
 }
 
-#gameboard {
+#game-board {
   display: grid;
   grid-template-columns: repeat(3, auto);
   gap: 5px;

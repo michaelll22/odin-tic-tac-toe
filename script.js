@@ -48,6 +48,9 @@ const GameController = (() => {
   // ------------------
   const startBtn = document.querySelector("#start-button");
   const restartBtn = document.querySelector("#restart-button");
+  const resetBtn = document.querySelector("#reset-button");
+  restartBtn.style.display = "none";
+  resetBtn.style.display = "none";
 
   const playerOne = document.getElementById("player1");
   const playerTwo = document.getElementById("player2");
@@ -73,24 +76,37 @@ const GameController = (() => {
   startBtn.addEventListener("click", () => {
     // if (playerOne.value && playerTwo.value) {
     startBtn.style.display = "none";
-    ScreenController.hideUI();
-
+    ScreenController.hideUI(false);
     createPlayers();
-    console.log(players);
+    resetBoard();
+    restartBtn.style.display = "";
+    resetBtn.style.display = "";
 
-    gameRunning = true;
-    winner = false;
-    currentPlayer = players[0];
-    GameBoard.getCells().fill("");
-    ScreenController.render(currentPlayer);
     // }
   });
 
   restartBtn.addEventListener("click", () => {
     resetGame();
+    ScreenController.hideUI(true);
+    restartBtn.style.display = "none";
+    startBtn.style.display = "";
+    resetBtn.style.display = "none";
+
+    ScreenController.getGameInfo("Enter player names");
+  });
+
+  resetBtn.addEventListener("click", () => {
+    resetBoard();
+  });
+
+  const resetBoard = () => {
+    gameRunning = true;
+    winner = false;
+    draw = false;
+    currentPlayer = players[0];
     GameBoard.getCells().fill("");
     ScreenController.render(currentPlayer);
-  });
+  };
 
   const createPlayers = () => {
     players[0].name = playerOne.value;
@@ -147,6 +163,9 @@ const GameController = (() => {
     winner = false;
     currentPlayer = players[0];
     ScreenController.removeBoard();
+
+    playerOne.value = "";
+    playerTwo.value = "";
   };
 
   const switchPlayer = () => {
@@ -173,7 +192,7 @@ const GameController = (() => {
 //------------------
 
 const ScreenController = (() => {
-  const board = document.querySelector("#gameboard");
+  const board = document.querySelector("#game-board");
   const info = document.querySelector(".game-info");
 
   const render = (player) => {
@@ -210,12 +229,18 @@ const ScreenController = (() => {
     return button;
   };
 
-  const removeBoard = () => {};
+  const removeBoard = () => {
+    GameBoard.getCells().fill("");
+    const board = document.getElementById("game-board");
+    while (board.firstChild) {
+      board.removeChild(board.lastChild);
+    }
+  };
 
-  const hideUI = () => {
+  const hideUI = (display) => {
     const inputs = document.querySelectorAll("input");
-
-    inputs.forEach((input) => (input.style.display = "none"));
+    display = display == true ? "inline-block" : "none";
+    inputs.forEach((input) => (input.style.display = display));
   };
 
   return {

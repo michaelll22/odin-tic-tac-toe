@@ -212,10 +212,10 @@ const ScreenController = (() => {
 
     console.log(GameController.getWinner());
 
-    if (GameController.getDraw()) {
-      info.textContent = `DRAW!`;
-    } else if (!GameController.getWinner() == false) {
+    if (!GameController.getWinner() == false) {
       info.textContent = `${player.mark}: ${player.name} wins`;
+    } else if (GameController.getDraw()) {
+      info.textContent = `DRAW!`;
     } else {
       info.textContent = `${player.mark}: ${player.name}'s Turn`;
     }

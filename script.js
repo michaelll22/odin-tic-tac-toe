@@ -212,7 +212,7 @@ const ScreenController = (() => {
 
     console.log(GameController.getWinner());
 
-    if (!GameController.getWinner() == false) {
+    if (GameController.getWinner()) {
       info.textContent = `${player.mark}: ${player.name} wins`;
     } else if (GameController.getDraw()) {
       info.textContent = `DRAW!`;

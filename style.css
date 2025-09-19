@@ -15,14 +15,62 @@ header {
   gap: 10px;
 }
 
+.game-info {
+  font-size: large;
+  font-weight: 700;
+}
+
 #game-board {
   display: grid;
   grid-template-columns: repeat(3, auto);
-  gap: 5px;
 }
 
+#game-board button {
+  font-size: x-large;
+  font-weight: 700;
+  outline: none;
+  border: 1px solid black;
+  background-color: white;
+}
 
 .cells {
   width: 100px;
   height: 100px;
+}
+
+#controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.reset-controls {
+  padding: 10px;
+  max-width: fit-content;
+  display: inline-block;
+}
+
+input {
+  padding: 5px;
+  outline: none;
+  border: 1px solid grey;
+  border-radius: 10px;
+  width: 100%;
+  max-width: fit-content;
+}
+
+#controls button {
+  padding: 10px;
+  max-width: fit-content;
+  outline: none;
+  border: 1px solid grey;
+  border-radius: 20px;
+  background-color: orange;
+  transition: all 0.3s;
+}
+
+#controls button:hover {
+  background-color: orangered;
 }
